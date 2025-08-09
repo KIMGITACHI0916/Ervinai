@@ -18,9 +18,9 @@ def call_openrouter(prompt, model=None, max_tokens=2000, timeout=120):
         model = OPENROUTER_DEFAULT_MODEL
 
     headers = {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json"
-    }
+    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+    "Content-Type": "application/json"
+}
 
     payload = {
         "model": model,
