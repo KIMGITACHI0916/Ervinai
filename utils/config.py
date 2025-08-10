@@ -6,7 +6,7 @@ load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
-OPENROUTER_DEFAULT_MODEL = os.getenv('OPENROUTER_DEFAULT_MODEL', 'nousresearch/hermes-2-pro-llama-3-8b')
+OPENROUTER_DEFAULT_MODEL = os.getenv('OPENROUTER_DEFAULT_MODEL', 'mistralai/mistral-7b-instruct')
 MAX_FILE_MB = int(os.getenv('MAX_FILE_MB', '500'))
 TEMP_DIR = os.getenv('TEMP_DIR', '/tmp')
 
