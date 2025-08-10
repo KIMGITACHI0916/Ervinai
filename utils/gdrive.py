@@ -1,38 +1,30 @@
 import os
-import re
-import tempfile
-import logging
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
+from googleapiclient.http import MediaFileUpload
 
-from pydrive.auth import GoogleAuth
-from pydrive.drive import GoogleDrive
+from config import GDRIVE_SERVICE_ACCOUNT_JSON, GDRIVE_FOLDER_ID
 
-logger = logging.getLogger(__name__)
+def upload_to_gdrive(file_path, filename=None):
+    if not filename:
+        filename = os.path.basename(file_path)
 
-def download_from_gdrive(url_or_id: str) -> str:
-    """
-    Download a file from Google Drive given a share link or file ID.
-    Returns the local path to the downloaded file.
-    """
-    # Extract file ID from various link formats
-    file_id_match = re.search(r"[-\w]{25,}", url_or_id)
-    if not file_id_match:
-        raise ValueError("Could not parse Google Drive file ID from input.")
-    file_id = file_id_match.group(0)
+    creds = service_account.Credentials.from_service_account_file(
+        GDRIVE_SERVICE_ACCOUNT_JSON,
+        scopes=["https://www.googleapis.com/auth/drive"]
+    )
+    service = build("drive", "v3", credentials=creds)
 
-    logger.info(f"Downloading from Google Drive, file ID: {file_id}")
+    file_metadata = {"name": filename}
+    if GDRIVE_FOLDER_ID:
+        file_metadata["parents"] = [GDRIVE_FOLDER_ID]
 
-    # Authenticate with Google Drive (assumes client_secrets.json in project root)
-    gauth = GoogleAuth()
-    gauth.LocalWebserverAuth()
-    drive = GoogleDrive(gauth)
+    media = MediaFileUpload(file_path, resumable=True)
+    uploaded_file = service.files().create(
+        body=file_metadata,
+        media_body=media,
+        fields="id"
+    ).execute()
 
-    # Download file to temp path
-    temp_file = tempfile.NamedTemporaryFile(delete=False)
-    temp_file.close()
-
-    file_obj = drive.CreateFile({'id': file_id})
-    file_obj.GetContentFile(temp_file.name)
-
-    logger.info(f"Downloaded Google Drive file to {temp_file.name}")
-    return temp_file.name
-  
+    return uploaded_file.get("id")
+    
