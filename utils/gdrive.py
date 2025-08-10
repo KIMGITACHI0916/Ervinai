@@ -2,8 +2,7 @@ import os
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
-
-from config import GDRIVE_SERVICE_ACCOUNT_JSON, GDRIVE_FOLDER_ID
+from utils.config import GDRIVE_SERVICE_ACCOUNT_JSON, GDRIVE_FOLDER_ID
 
 def upload_to_gdrive(file_path, filename=None):
     if not filename:
