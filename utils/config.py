@@ -1,13 +1,16 @@
 import os
+import json
 from dotenv import load_dotenv
+from google.oauth2 import service_account
+from googleapiclient.discovery import build
 
 # Load .env for local dev; in production (Railway) use project env vars.
 load_dotenv()
 
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
-GDRIVE_SERVICE_ACCOUNT_JSON = os.getenv('GDRIVE_SERVICE_ACCOUNT_JSON')  # JSON file name
-GDRIVE_FOLDER_ID = os.getenv('GDRIVE_FOLDER_ID')  # Google Drive folder ID
+GDRIVE_SERVICE_ACCOUNT_JSON = os.getenv('GDRIVE_SERVICE_ACCOUNT_JSON')  # This is the JSON string
+GDRIVE_FOLDER_ID = os.getenv('GDRIVE_FOLDER_ID')
 OPENROUTER_DEFAULT_MODEL = os.getenv('OPENROUTER_DEFAULT_MODEL', 'deepseek/deepseek-chat-v3-0324:free')
 MAX_FILE_MB = int(os.getenv('MAX_FILE_MB', '500'))
 TEMP_DIR = os.getenv('TEMP_DIR', '/tmp')
@@ -31,7 +34,6 @@ def validate_config(logger=None):
             print('ERROR:', msg)
         return False
 
-    # basic key format check
     if not (OPENROUTER_API_KEY.startswith('sk-') or OPENROUTER_API_KEY.startswith('sk-or-')):
         note = 'OPENROUTER_API_KEY does not appear to begin with expected prefix (sk- or sk-or-).'
         if logger:
@@ -40,4 +42,10 @@ def validate_config(logger=None):
             print('WARNING:', note)
 
     return True
+
+def get_drive_service():
+    """Create and return a Google Drive service object using service account JSON from env."""
+    service_account_info = json.loads(GDRIVE_SERVICE_ACCOUNT_JSON)
+    creds = service_account.Credentials.from_service_account_info(service_account_info)
+    return build('drive', 'v3', credentials=creds)
     
